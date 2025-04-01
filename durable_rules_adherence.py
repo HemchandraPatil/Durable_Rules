@@ -9,9 +9,10 @@ rules = df.to_dict(orient="records")
 # Function to properly format conditions
 def format_conditions(condition_expr):
     formatted_expr = condition_expr.strip()
-    formatted_expr = formatted_expr.replace("AND", "and").replace("OR", "or")  
-    #formatted_expr = formatted_expr.replace("days_since_last_refill", "m.days_since_last_refill")  
-    #formatted_expr = formatted_expr.replace("stage", "m.stage")  
+    #formatted_expr = formatted_expr.replace("AND", "and").replace("OR", "or")  
+    formatted_expr = formatted_expr.replace("days_since_last_refill", "m.days_since_last_refill")  
+    formatted_expr = formatted_expr.replace("stage", "m.stage")  
+    return formatted_expr
 
 # Define ruleset
 with ruleset("medication_adherence"):
