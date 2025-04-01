@@ -8,8 +8,6 @@ df = pd.read_excel("/workspaces/Durable_Rules/rule2.xlsx")
 rules = df.to_dict(orient="records")
 print(rules)
 
-# Map Excel operators to Python operators
-op_map = {">": ">", "<": "<", '>=': ">=", "<=": "<=", "=": "=="}
 
 # Sort rules by the highest discount first
 rules.sort(key=lambda r: float(r["Action value"]) if r["Action Type"] == "Discount" else 1.0)
@@ -17,8 +15,8 @@ rules.sort(key=lambda r: float(r["Action value"]) if r["Action Type"] == "Discou
 # Define rulesets
 with ruleset("Discount"):
     def add_rule(rule_name, condition, operator, value, action_type, action_value):
-        python_operator = op_map.get(operator, "==")
-        condition_expr = f"m.{condition} {python_operator} {value}"
+        #python_operator = op_map.get(operator, "==")
+        condition_expr = f"m.{condition} {operator} {value}"
         
         @when_all(eval(condition_expr))
         def rule_action(c):
