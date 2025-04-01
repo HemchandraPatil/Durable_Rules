@@ -25,6 +25,8 @@ with ruleset("medication_adherence"):
             medication = c.m['medication']
             days_since_last_refill = c.m['days_since_last_refill']
 
+            #print("Hello")
+
             if action_type == "Fact":
                 print(f"Reminder: Patient {patient_id}, please refill {medication}.")
                 assert_fact("medication_adherence", {
