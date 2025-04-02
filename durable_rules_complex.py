@@ -18,7 +18,7 @@ def format_conditions(condition_expr):
     return formatted_expr
 
 # Sort rules by the highest discount first
-rules.sort(key=lambda r: float(r["Discount Value"]) if r["Discount Type"] == "Discount" else 1.0)
+#rules.sort(key=lambda r: float(r["Discount Value"]) if r["Discount Type"] == "Discount" else 1.0)
 
 #Define ruleset
 with ruleset("complex_rule"):
@@ -34,6 +34,8 @@ with ruleset("complex_rule"):
             price = c.m["price"] 
 
             if action_type == 'Fact' and discount_type == 'Discount':
+                print(action_type)
+                print(discount_type)
                 discount_price = price - (price * (discount_value/100))
                 print(f"Discount and Reminder : We have applied {discount_value}% discount on {medication}, New price is {discount_price}. Reminder to Patient {patient_id}, please refill {medication}.")
                 assert_fact("complex_rule", {"patient_id": patient_id,
@@ -41,8 +43,11 @@ with ruleset("complex_rule"):
                     "days_since_last_refill": days_since_last_refill,
                     "price":price,
                     "stage": "reminder_sent"})
+                delete_state(c)
                 
             elif action_type == "Offer" and discount_type == "Discount":
+                print(action_type)
+                print(discount_type)
                 new_discount_price = price - (price * (discount_value/100))
                 print(f"More Discount and Resend reminder : We have applied {discount_value}% discount on {medication}, New price is {new_discount_price}. Resend reminder to Patient {patient_id}, please refill {medication} ")
                 assert_fact("complex_rule", {"patient_id": patient_id,
@@ -50,8 +55,11 @@ with ruleset("complex_rule"):
                     "days_since_last_refill": days_since_last_refill,
                     "price":price,
                     "stage": "resent_reminder"})
+                delete_state(c)
                 
             elif action_type == "Escalate":
+                print(action_type)
+                print(discount_type)
                 print (f"Escalation: Patient {patient_id} has not refilled {medication} for 50+ days. Contact required.")
 
     #Add rules from escel
@@ -60,15 +68,15 @@ with ruleset("complex_rule"):
 
 
 #test the engine
-message = {"patient_id":101, "medication": "Aspirin", "days_since_last_refill": 35, "price":2000,"stage": "resent_reminder"}
-print("Posting Message:",message)
-post("complex_rule",message)
+# message = {"patient_id":101, "medication": "Aspirin", "days_since_last_refill": 35, "price":2000,"stage": "resent_reminder"}
+# print("Posting Message:",message)
+# post("complex_rule",message)
 
-# post("complex_rule", {"patient_id": 101, "medication": "Aspirin", "days_since_last_refill": 35, "Price": 2000,"stage": "reminder_sent"})  
-# #Should send a reminder and apply 20% discount
+post("complex_rule", {"patient_id": 101, "medication": "Aspirin", "days_since_last_refill": 35, "Price": 2000})  
+#Should send a reminder and apply 20% discount
 
-# post("complex_rule", {"patient_id": 101, "medication": "Aspirin", "days_since_last_refill": 45, "price":3000, "stage":"resent_reminder"})  
-# #Should resend a reminder and apply 50% discount
+post("complex_rule", {"patient_id": 101, "medication": "Aspirin", "days_since_last_refill": 45, "price":3000, "stage":"resent_reminder"})  
+#Should resend a reminder and apply 50% discount
 
-# post("complex_rule", {"patient_id": 101, "medication": "Aspirin", "days_since_last_refill": 51, "stage":"resent_reminder"})
-# #Should Escalte and contact required
+post("complex_rule", {"patient_id": 101, "medication": "Aspirin", "days_since_last_refill": 51, "stage":"resent_reminder"})
+#Should Escalte and contact required

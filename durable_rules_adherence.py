@@ -34,6 +34,7 @@ with ruleset("medication_adherence"):
                     "days_since_last_refill": days_since_last_refill,
                     "stage": "reminder_sent"
                 })
+                delete_state(c)
 
             elif action_type == "Escalate":
                 print(f"Escalation: Patient {patient_id} has not refilled {medication} for 40+ days. Contact required.")
