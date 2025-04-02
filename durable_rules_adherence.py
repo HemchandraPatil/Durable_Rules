@@ -18,7 +18,7 @@ def format_conditions(condition_expr):
 with ruleset("medication_adherence"):
     def add_rule(rule_name, condition, action_type, action_value):
         formatted_conditions = format_conditions(condition)  # Fix conditions
-        print(f"Registering Rule: {rule_name} with Condition: {formatted_conditions}")
+        #print(f"Registering Rule: {rule_name} with Condition: {formatted_conditions}")
         
         @when_all(eval(formatted_conditions))
         def rule_action(c):

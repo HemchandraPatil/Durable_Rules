@@ -60,15 +60,15 @@ with ruleset("complex_rule"):
 
 
 #test the engine
-# message = {"patient_id":101, "medication": "Aspirin", "days_since_last_refill": 45, "price":3000,"stage": "resent_reminder"}
-# print("Posting Message:",message)
-# post("complex_rule",message)
+message = {"patient_id":101, "medication": "Aspirin", "days_since_last_refill": 35, "price":2000,"stage": "resent_reminder"}
+print("Posting Message:",message)
+post("complex_rule",message)
 
-post("complex_rule", {"patient_id": 101, "medication": "Aspirin", "days_since_last_refill": 35, "Price": 2000,"stage": "reminder_sent"})  
-#Should send a reminder and apply 20% discount
+# post("complex_rule", {"patient_id": 101, "medication": "Aspirin", "days_since_last_refill": 35, "Price": 2000,"stage": "reminder_sent"})  
+# #Should send a reminder and apply 20% discount
 
-post("complex_rule", {"patient_id": 101, "medication": "Aspirin", "days_since_last_refill": 45, "price":3000, "stage":"resent_reminder"})  
-#Should resend a reminder and apply 50% discount
+# post("complex_rule", {"patient_id": 101, "medication": "Aspirin", "days_since_last_refill": 45, "price":3000, "stage":"resent_reminder"})  
+# #Should resend a reminder and apply 50% discount
 
-post("complex_rule", {"patient_id": 101, "medication": "Aspirin", "days_since_last_refill": 51, "stage":"resent_reminder"})
-#Should Escalte and contact required
+# post("complex_rule", {"patient_id": 101, "medication": "Aspirin", "days_since_last_refill": 51, "stage":"resent_reminder"})
+# #Should Escalte and contact required
