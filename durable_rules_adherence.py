@@ -28,12 +28,12 @@ with ruleset("medication_adherence"):
 
             if action_type == "Fact":
                 print(f"Reminder: Patient {patient_id}, please refill {medication}.")
-                assert_fact("medication_adherence", {
-                    "patient_id": patient_id,
-                    "medication": medication,
-                    "days_since_last_refill": days_since_last_refill,
-                    "stage": "reminder_sent"
-                })
+                # assert_fact("medication_adherence", {
+                #     "patient_id": patient_id,
+                #     "medication": medication,
+                #     "days_since_last_refill": days_since_last_refill,
+                #     "stage": "reminder_sent"
+                # })
                 delete_state(c)
 
             elif action_type == "Escalate":
@@ -48,7 +48,7 @@ with ruleset("medication_adherence"):
 # print("Posting Message:",message)
 #post("medication_adherence",message)
 
-post("medication_adherence", {"patient_id": 101, "medication": "Aspirin", "days_since_last_refill": 35})  
+post("medication_adherence", {"patient_id": 101, "medication": "Aspirin", "days_since_last_refill": 32})  
 # #Should send a reminder
 
 post("medication_adherence", {"patient_id": 101, "medication": "Aspirin", "days_since_last_refill": 45, "stage": "reminder_sent"})  
