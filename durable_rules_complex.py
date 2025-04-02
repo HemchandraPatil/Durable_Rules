@@ -66,7 +66,7 @@ with ruleset("complex_rule"):
 # print("Posting Message:",message)
 # post("complex_rule",message)
 
-post("complex_rule", {"patient_id": 101, "medication": "Aspirin", "days_since_last_refill": 35, "price": 2000})  
+post("complex_rule", {"patient_id": 101, "medication": "Aspirin", "days_since_last_refill": 35, "price": 3000})  
 # #Should send a reminder and apply 20% discount
 
 post("complex_rule", {"patient_id": 101, "medication": "Aspirin", "days_since_last_refill": 45, "price":3000, "stage":"resent_reminder"})  
