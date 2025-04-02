@@ -2,10 +2,6 @@ import pandas as pd
 import re
 from durable.lang import *
 
-#import pandas as pd
-import re
-from durable.lang import *
-
 # Load Excel file
 df = pd.read_excel("/workspaces/Durable_Rules/complex_rules2.xlsx")
 
@@ -20,6 +16,9 @@ def format_conditions(condition_expr):
     formatted_expr = formatted_expr.replace("stage", "m.stage")
     return formatted_expr
 
+# Track processed patient-stage pairs to avoid duplicate rule execution
+processed_rules = set()
+
 # Define ruleset
 with ruleset("complex_rule"):
     def add_rule(rule_name, condition, action_type, action_value, discount_type, discount_value):
@@ -30,12 +29,16 @@ with ruleset("complex_rule"):
             patient_id = c.m['patient_id']
             medication = c.m['medication']
             days_since_last_refill = c.m['days_since_last_refill']
-            price = c.m['price']  # Default to 0 if price is missing
-            #stage = c.m.get('stage', None)
+            price = c.m.get('price', 0)  # Default to 0 if price is missing
+            stage = c.m.get('stage', None)
             
             print(f"Processing Rule: {rule_name} for Patient {patient_id} with condition {formatted_conditions}")
             
-            #retract_fact("complex_rule", c.m)  # Prevent duplicate rule execution
+            # Avoid duplicate execution for the same rule-stage pair
+            key = (patient_id, medication, stage, rule_name)
+            if key in processed_rules:
+                return
+            processed_rules.add(key)
 
             if action_type == 'Fact' and discount_type == 'Discount':
                 discount_price = price - (price * (discount_value/100))
@@ -44,7 +47,7 @@ with ruleset("complex_rule"):
                     "patient_id": patient_id,
                     "medication": medication,
                     "days_since_last_refill": days_since_last_refill,
-                    "price": price,
+                    "price": discount_price,
                     "stage": "reminder_sent"
                 })
             
@@ -55,7 +58,7 @@ with ruleset("complex_rule"):
                     "patient_id": patient_id,
                     "medication": medication,
                     "days_since_last_refill": days_since_last_refill,
-                    "price": price,
+                    "price": discount_price,
                     "stage": "resent_reminder"
                 })
             

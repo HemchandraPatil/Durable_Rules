@@ -17,6 +17,9 @@ def format_conditions(condition_expr):
     formatted_expr = formatted_expr.replace("stage", "m.stage")  
     return formatted_expr
 
+# Sort rules by the highest discount first
+rules.sort(key=lambda r: float(r["Discount Value"]) if r["Discount Type"] == "Discount" else 1.0)
+
 #Define ruleset
 with ruleset("complex_rule"):
     def add_rule(rule_name,condition,action_type,action_value,discount_type,discount_value):
