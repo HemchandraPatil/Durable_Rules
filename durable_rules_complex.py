@@ -28,11 +28,11 @@ with ruleset("complex_rule"):
             patient_id = c.m['patient_id']
             medication = c.m['medication']
             days_since_last_refill = c.m['days_since_last_refill']
-            price = c.m['price']
+            price = c.m["price"] 
 
             if action_type == 'Fact' and discount_type == 'Discount':
                 discount_price = price - (price * (discount_value/100))
-                print(f"Discount and Reminder : We have applied discount on {medication}, New price is {discount_price}. Reminder to Patient {patient_id}, please refill {medication}.")
+                print(f"Discount and Reminder : We have applied {discount_value}% discount on {medication}, New price is {discount_price}. Reminder to Patient {patient_id}, please refill {medication}.")
                 assert_fact("complex_rule", {"patient_id": patient_id,
                     "medication": medication,
                     "days_since_last_refill": days_since_last_refill,
@@ -41,7 +41,7 @@ with ruleset("complex_rule"):
                 
             elif action_type == "Offer" and discount_type == "Discount":
                 discount_price = price - (price * (discount_value/100))
-                print(f"More Discount and Resend reminder : We have applied discount on {medication}, New price is {discount_price}. Resend reminder to Patient {patient_id}, please refill {medication} ")
+                print(f"More Discount and Resend reminder : We have applied {discount_value}% discount on {medication}, New price is {discount_price}. Resend reminder to Patient {patient_id}, please refill {medication} ")
                 assert_fact("complex_rule", {"patient_id": patient_id,
                     "medication": medication,
                     "days_since_last_refill": days_since_last_refill,
@@ -64,8 +64,8 @@ with ruleset("complex_rule"):
 assert_fact("complex_rule", {"patient_id": 101, "medication": "Aspirin", "days_since_last_refill": 35, "Price": 2000,"stage": "reminder_sent"})  
 #Should send a reminder and apply 20% discount
 
-post("complex_rule", {"patient_id": 101, "medication": "Aspirin", "days_since_last_refill": 45, "price":3000, "stage":"reminder_sent"})  
+assert_fact("complex_rule", {"patient_id": 101, "medication": "Aspirin", "days_since_last_refill": 45, "price":3000, "stage":"reminder_sent"})  
 #Should resend a reminder and apply 50% discount
 
-post("complex_rule", {"patient_id": 101, "medication": "Aspirin", "days_since_last_refill": 51, "stage":"resent_reminder"})
+assert_fact("complex_rule", {"patient_id": 101, "medication": "Aspirin", "days_since_last_refill": 51, "stage":"resent_reminder"})
 #Should Escalte and contact required

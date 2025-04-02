@@ -2,42 +2,71 @@ import pandas as pd
 import re
 from durable.lang import *
 
-# Load rules from Excel
+#import pandas as pd
+import re
+from durable.lang import *
 
+# Load Excel file
+df = pd.read_excel("/workspaces/Durable_Rules/complex_rules2.xlsx")
 
-#print("Loaded rules from Excel: ", rules)
-
-import pandas as pd
-
-# Load the rules from the Excel sheet
-df = pd.read_excel("/workspaces/Durable_Rules/adherence_rules.xlsx")
+# Convert to list of dictionaries
 rules = df.to_dict(orient="records")
 
-# Evaluate conditions dynamically
-def evaluate_rule(rule_condition, context):
-    try:
-        return eval(rule_condition, {}, context)
-    except Exception as e:
-        print(f"Error evaluating condition '{rule_condition}': {e}")
-        return False
+# Function to properly format conditions
+def format_conditions(condition_expr):
+    formatted_expr = condition_expr.strip()
+    formatted_expr = formatted_expr.replace("AND", "and").replace("OR", "or")
+    formatted_expr = formatted_expr.replace("days_since_last_refill", "m.days_since_last_refill")
+    formatted_expr = formatted_expr.replace("stage", "m.stage")
+    return formatted_expr
 
-# Apply rules to the given data
-def apply_rules(rules, context):
-    for _, rule in rules.iterrows():
-        condition = rule["Condition"]
-        action_type = rule["Action Type"]
-        action_value = rule["Action Value"]
+# Define ruleset
+with ruleset("complex_rule"):
+    def add_rule(rule_name, condition, action_type, action_value, discount_type, discount_value):
+        formatted_conditions = format_conditions(condition)
 
-        if evaluate_rule(condition, context):
-            print(f"Rule Triggered: {rule['Rule Name']}")
-            print(f"Action: {action_type} -> {action_value}")
+        @when_all(eval(formatted_conditions))
+        def rule_action(c):
+            patient_id = c.m['patient_id']
+            medication = c.m['medication']
+            days_since_last_refill = c.m['days_since_last_refill']
+            price = c.m['price']  # Default to 0 if price is missing
+            #stage = c.m.get('stage', None)
+            
+            print(f"Processing Rule: {rule_name} for Patient {patient_id} with condition {formatted_conditions}")
+            
+            #retract_fact("complex_rule", c.m)  # Prevent duplicate rule execution
 
-# Example Usage
-if __name__ == "__main__":
-    rules_file = "rules.xlsx"  # Update with your actual file path
-    rules = load_rules(rules_file)
+            if action_type == 'Fact' and discount_type == 'Discount':
+                discount_price = price - (price * (discount_value/100))
+                print(f"Reminder: Applied {discount_value}% discount on {medication}. New price: {discount_price}.")
+                assert_fact("complex_rule", {
+                    "patient_id": patient_id,
+                    "medication": medication,
+                    "days_since_last_refill": days_since_last_refill,
+                    "price": price,
+                    "stage": "reminder_sent"
+                })
+            
+            elif action_type == "Offer" and discount_type == "Discount":
+                discount_price = price - (price * (discount_value/100))
+                print(f"More Discount: Applied {discount_value}% discount on {medication}. New price: {discount_price}.")
+                assert_fact("complex_rule", {
+                    "patient_id": patient_id,
+                    "medication": medication,
+                    "days_since_last_refill": days_since_last_refill,
+                    "price": price,
+                    "stage": "resent_reminder"
+                })
+            
+            elif action_type == "Escalate":
+                print(f"Escalation: Patient {patient_id} has not refilled {medication} for 50+ days. Contact required.")
+    
+    # Add rules from Excel
+    for rule in rules:
+        add_rule(rule["Rule Name"], rule["Condition"], rule["Action Type"], rule["Action Value"], rule["Discount Type"], rule["Discount Value"])
 
-    # Example input data
-    test_data = {"days_since_last_refill": 35, "stage": "reminder_sent"}
-
-    apply_rules(rules, test_data)
+# Test the engine
+assert_fact("complex_rule", {"patient_id": 101, "medication": "Aspirin", "days_since_last_refill": 35, "price": 2000, "stage": "reminder_sent"})
+post("complex_rule", {"patient_id": 101, "medication": "Aspirin", "days_since_last_refill": 45, "price": 3000, "stage": "reminder_sent"})
+post("complex_rule", {"patient_id": 101, "medication": "Aspirin", "days_since_last_refill": 51, "stage": "resent_reminder"})
